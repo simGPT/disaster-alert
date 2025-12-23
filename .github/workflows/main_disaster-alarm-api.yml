@@ -12,8 +12,7 @@ on:
 
 env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: './api' # api 폴더로 변경
-  PYTHON_VERSION: '3.13'
-
+  PYTHON_VERSION: '3.11'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -79,3 +78,4 @@ jobs:
           app-name: 'disaster-alarm-api'
           slot-name: 'Production'
           package: '.'
+
