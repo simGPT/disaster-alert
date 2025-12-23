@@ -77,6 +77,6 @@ jobs:
         with:
           app-name: 'disaster-alarm-api'
           slot-name: 'Production'
-          package: './release.zip'
+          package: '.'
 
 
