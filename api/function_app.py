@@ -3,6 +3,7 @@ import logging
 import json
 import os
 import psycopg2
+import requests
 
 def get_db_connection():
     return psycopg2.connect(
@@ -155,3 +156,62 @@ def get_users(req: func.HttpRequest) -> func.HttpResponse:
             mimetype="application/json",
             headers={"Access-Control-Allow-Origin": "*"}
         )
+    
+# 재난 발생 후 알림 전송 API
+@app.route(route="disaster-alert", methods=["POST"])
+def trigger_disaster(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('재난 알림 발송 API 호출됨')
+    
+    try:
+        req_body = req.get_json()
+        region = req_body.get('region')
+        disaster_type = req_body.get('type', '긴급 상황')
+        
+        if not region:
+            return func.HttpResponse("지역(region)은 필수 입력 사항입니다.", status_code=400)
+
+        # 재난 발생 지역 사용자 이메일만 조회
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # email 리스트
+        cursor.execute("SELECT email FROM users WHERE region = %s", (region,))
+        rows = cursor.fetchall()
+        
+        recipients = [{"email": row[0]} for row in rows]
+        
+        cursor.close()
+        conn.close()
+
+        if not recipients:
+            return func.HttpResponse(f"{region} 지역에 등록된 사용자가 없습니다.", status_code=404)
+
+        # VMSS 로드 밸런서로 요청 전달
+        vmss_url = "http://104.208.80.218:8000/send-emails"
+        
+        payload = {
+            "disaster_info": {
+                "region": region,
+                "type": disaster_type
+            },
+            "recipients": recipients
+        }
+
+        # VMSS로 전송
+        vmss_response = requests.post(vmss_url, json=payload, timeout=120)
+        
+        return func.HttpResponse(
+            json.dumps({
+                "success": True,
+                "target_region": region,
+                "user_count": len(recipients),
+                "vmss_status": vmss_response.status_code,
+                "message": f"{len(recipients)}명, 재난 알림 요청 완료"
+            }, ensure_ascii=False),
+            status_code=200,
+            mimetype="application/json"
+        )
+
+    except Exception as e:
+        logging.error(f"재난 알림 오류: {str(e)}")
+        return func.HttpResponse(f"서버 오류: {str(e)}", status_code=500)
