@@ -3,16 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>재난 경보 알림 서비스 사용자 등록</title>
+    <title>재난 경보 알림 서비스 - 관리자</title>
 </head>
 <body>
-    <h1>재난 경보 알림 서비스 사용자 등록</h1>
-    
-    <form id="registerForm">
-        <input id="name" type="text" placeholder="이름" required><br><br>
+    <h1>재난 경보 알림 서비스 관리자</h1>
+
+    <nav>
+        <button onclick="location.href='index.html'">사용자 등록 페이지</button>
+    </nav>
+    <br>
+    <hr>
+    <section>
+        <h2>사용자 지역별 조회</h2>
         
-        <select id="local" name="local" required>
-            <option value="">== 거주 지역를 선택하세요 ==</option>
+        <label for="region">지역 선택:</label>
+        <select id="region">
+            <option value="">전체 지역</option>
             <option value="서울특별시">서울특별시</option>
             <option value="부산광역시">부산광역시</option>
             <option value="대구광역시">대구광역시</option>
@@ -30,13 +36,12 @@
             <option value="경상북도">경상북도</option>
             <option value="경상남도">경상남도</option>
             <option value="제주특별자치도">제주도</option>
-        </select><br><br>
+        </select>
         
-        <input id="email" type="email" placeholder="이메일" required><br><br>
+        <button onclick="searchUsers()">조회하기</button>
         
-        <button type="submit">등록하기</button>
-    </form>
-
-    <script src="register.js"></script>
+        <div id="userResult"></div>
+    </section>
+    <script src="admin.js"></script>
 </body>
 </html>
